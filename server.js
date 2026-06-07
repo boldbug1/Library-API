@@ -1,28 +1,25 @@
 const express = require("express");
 const app = express();
+app.use(express.json());
+let nextId = 1;
+const books = [];
 
 app.get("/",(req,res)=>{
     res.send("Library API");
 })
 
-const books = [];
 
 app.get("/books",(req,res)=>{
     res.json(books);
 })
 
-app.listen(3000,()=>{
-    console.log("Server running...");
-})
 
-app.use(express.json());
-let nextId = 1;
 
 app.post("/books",(req,res)=>{
     if (!req.body.title || !req.body.author) {
         return res.status(400).send("Missing title or author");
     }
-
+    
     const book = {
         id : nextId++,
         title : req.body.title,
@@ -30,28 +27,28 @@ app.post("/books",(req,res)=>{
     }
     books.push(book);
     res.status(201).json(book);
-
-
+    
+    
 })
 
 
 
 app.get("/books/:id",(req,res)=>{
     const id = Number(req.params.id);
-
+    
     const book = books.find(book=>book.id===id);
-
+    
     if(!book){
         return res.status(404).send("Not found");
     }
-
-   res.json(book);
+    
+    res.json(book);
 })
 
 
 app.get("/search",(req,res)=>{
     const bookName = req.query.title;
-
+    
     const book = books.find(book=>book.title===bookName);
     if(!book){
         return res.status(404).send("Book not found");
@@ -62,20 +59,20 @@ app.get("/search",(req,res)=>{
 app.delete("/books/:id",(req,res)=>{
     const id = Number(req.params.id);
     const index = books.findIndex(book=>book.id===id);
-
+    
     if(index === -1){
         return res.status(404).send("Book not found");
     }
-
+    
     books.splice(index,1);
-
+    
     res.status(204).send();
 })
 
 app.patch("/books/:id",(req,res)=>{
     const id = Number(req.params.id);
     const book = books.find(book=>book.id===id);
-
+    
     if(!book){
         return res.status(404).send("Book not found");
     }
@@ -85,6 +82,10 @@ app.patch("/books/:id",(req,res)=>{
     if(req.body.author){
         book.author = req.body.author;
     }
-
+    
     res.json(book);
+    })
+
+app.listen(3000,()=>{
+    console.log("Server running...");
 })
