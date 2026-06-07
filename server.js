@@ -17,11 +17,6 @@ app.get("/books",(req,res)=>{
     res.json(books);
 })
 
-
-
-
-
-
 app.post("/books",(req,res)=>{
     if (!req.body.title || !req.body.author) {
         return res.status(400).send("Missing title or author");
@@ -38,8 +33,6 @@ app.post("/books",(req,res)=>{
     
 })
 
-
-
 app.get("/books/:id",(req,res)=>{
     const id = Number(req.params.id);
     
@@ -51,7 +44,6 @@ app.get("/books/:id",(req,res)=>{
     
     res.json(book);
 })
-
 
 app.get("/search",(req,res)=>{
     const bookName = req.query.title;
