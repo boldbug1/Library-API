@@ -1,6 +1,10 @@
 const express = require("express");
 const app = express();
+
+//Middleware
 app.use(express.json());
+app.use(express.static("public"));
+
 let nextId = 1;
 const books = [];
 
@@ -12,6 +16,9 @@ app.get("/",(req,res)=>{
 app.get("/books",(req,res)=>{
     res.json(books);
 })
+
+
+
 
 
 
