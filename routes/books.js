@@ -10,6 +10,9 @@ router.post("/",(req,res)=>{
     if (!req.body.title || !req.body.author) {
         return res.status(400).send("Missing title or author");
     }
+
+    console.log("POST RECEIVED");
+    console.log(req.body);
     
     const book = {
         id : getNextId(),
