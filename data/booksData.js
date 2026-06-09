@@ -1,7 +1,7 @@
-const books = [];
-let nextId = 1;
+const books = []
+let nextId = 1
 
 module.exports = {
-    books,
-    getNextId: () => nextId++
-};
+  books,
+  getNextId: () => nextId++
+}

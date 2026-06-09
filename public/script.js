@@ -11,6 +11,7 @@ const bookContainer = document.getElementById("books-container");
                 <h1>${book.title}</h1>
                 <p>${book.author}</p>
                 <button onClick = "deleteBook(${book.id})">Delete</button>
+                <button onClick = "editBook(${book.id})">Edit</button>
                 </div>
                 `;
                 
