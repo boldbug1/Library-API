@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const logger = require("./middleware/logger.js")
-const booksRouter = require("./routes/books.js")
+const booksRouter = require("./routes/booksRoutes.js")
 //Middleware
 app.use(express.json());
 app.use(express.static("public"));
