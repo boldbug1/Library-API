@@ -1,19 +1,16 @@
 const express = require("express");
 const { getNextId ,books} = require("../data/booksData");
 const router = express.Router();
+const validateCreateBook = require("../middleware/auth.js");
+const validateUpdateBook = require("../middleware/auth.js");
+
 
 router.get("/",(req,res)=>{
     res.json(books);
 })
 
-router.post("/",(req,res)=>{
-    if (!req.body.title || !req.body.author) {
-        return res.status(400).send("Missing title or author");
-    }
+router.post("/",validateCreateBook,(req,res)=>{
 
-    console.log("POST RECEIVED");
-    console.log(req.body);
-    
     const book = {
         id : getNextId(),
         title : req.body.title,
@@ -21,7 +18,6 @@ router.post("/",(req,res)=>{
     }
     books.push(book);
     res.status(201).json(book);
-    
     
 })
 
@@ -61,7 +57,7 @@ router.delete("/:id",(req,res)=>{
     res.status(204).send();
 })
 
-router.patch("/:id",(req,res)=>{
+router.patch("/:id",validateUpdateBook,(req,res)=>{
     const id = Number(req.params.id);
     const book = books.find(book=>book.id===id);
     
