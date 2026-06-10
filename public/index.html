@@ -13,15 +13,17 @@
     <br>
     <label for="author-inpt">Author : </label>
     <input type="text" id="author-inpt" required>
+    <p style="color: red; font-style: italic;" id="error-container"></p>
     <button type="submit">Add</button>
 </form>
 <div class="books" id="books-container"></div>
-.
+
 <form action="" id="edit-form">
     <label for="edit-title-inpt">Title : </label>
     <input type="text" id="edit-title-inpt">
     <label for="edit-author-inpt">Author : </label>
     <input type="text" id="edit-author-inpt">
+    <p style="color: red; font-style: italic;" id="edit-error-container"></p>
     <button style="background-color: red;" onclick="hideEditContainer()" type="button">Cancel</button>
     <button type="submit">Confirm</button>
 </form>

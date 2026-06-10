@@ -43,7 +43,7 @@ p {
     max-width: 400px; 
 }
 
-#inpt-container label, #edit-form label {
+form label {
     display: block;
     margin-bottom: 5px;
     font-weight: bold;

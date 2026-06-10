@@ -3,11 +3,20 @@ const bookContainer = document.getElementById('books-container')
 const editContainer = document.getElementById('edit-form')
 const editTitleInput = document.getElementById('edit-title-inpt')
 const editAuthorInput = document.getElementById('edit-author-inpt')
+const errorContainer = document.getElementById("error-container");
+const editErrorContainer = document.getElementById("edit-error-container");
 
 let localBooksArray = [];
 let currentEditingId = null;
 editContainer.style.display = 'none'
 
+function showError(containerType,error){
+  containerType.textContent = error; 
+}
+
+function hideError(containerType){
+  containerType.innerHTML = "";
+}
 async function loadBooks () {
   const response = await fetch('/books')
   const books = await response.json();
@@ -28,7 +37,7 @@ async function loadBooks () {
 }
 
 async function createBook (title, author) {
-  await fetch('/books', {
+  const response = await fetch('/books', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -39,7 +48,11 @@ async function createBook (title, author) {
     })
   })
 
-  loadBooks()
+  if(response.ok){
+    await loadBooks();
+  }
+
+  return response;
 }
 
 async function deleteBook (id) {
@@ -47,18 +60,22 @@ async function deleteBook (id) {
     method: 'DELETE'
   })
 
-  loadBooks()
+  loadBooks();
 }
 
 async function updateBook(id,title,author) {
-    await fetch(`/books/${id}`,{
+   const response = await fetch(`/books/${id}`,{
         method : "PATCH",
         headers : {"Content-type" : "application/json"},
         body : JSON.stringify({title,author}),
     });
 
-    loadBooks();
+    if(response.ok){
+      await loadBooks();
+    }
     
+    
+    return response;
 }
 
 InputContainer.addEventListener('submit', async e => {
@@ -67,8 +84,13 @@ InputContainer.addEventListener('submit', async e => {
   const bookTitle = document.getElementById('title-inpt').value
   const authorName = document.getElementById('author-inpt').value
 
-  await createBook(bookTitle, authorName)
-
+  const response = await createBook(bookTitle, authorName)
+  
+  if(response.status === 400){
+      showError(errorContainer,"A book with this name and author already exists.");
+      return;
+  }
+  hideError(errorContainer);
   InputContainer.reset()
 })
 
@@ -86,6 +108,7 @@ function showEditContainer () {
 
 function editBook (id) {
   showEditContainer();
+  hideError(editErrorContainer);
   currentEditingId = id;
   const book = localBooksArray.find(book => book.id === id);
 
@@ -100,10 +123,17 @@ function editBook (id) {
 editContainer.addEventListener("submit", async (e)=>{
     e.preventDefault();
 
+
     const updatedTitle = editTitleInput.value;
     const updatedAuthor = editAuthorInput.value;
 
-    await updateBook(currentEditingId,updatedTitle,updatedAuthor);
+    const response = await updateBook(currentEditingId,updatedTitle,updatedAuthor);
 
+    if(response.status === 400){
+      showError(editErrorContainer,"A book with this name and author already exists.");
+      return;
+    }
+
+    hideError(editErrorContainer);
     hideEditContainer();
 })

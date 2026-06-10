@@ -21,19 +21,21 @@ function validateCreateBook (req, res, next) {
     return res.status(400).send('Fields cannot be empty')
   }
 
-  let isDuplicate
+  
 
   if (title && author) {
-    isDuplicate = books.find(
+    const isDuplicate = books.some(
       book =>
         book.title.trim().toLowerCase() === trimmedTitle.toLowerCase() &&
         book.author.trim().toLowerCase() === trimmedAuthor.toLowerCase()
     )
+
+    if (isDuplicate) {
+    return res.status(400).json('Book with this name and author already exists')
+    }
   }
 
-  if (isDuplicate) {
-    return res.status(400).json('Book with this name and author already exists')
-  }
+  
   next()
 }
 
@@ -57,7 +59,7 @@ function validateUpdateBook (req, res, next) {
   }
 
   if (title && author) {
-    const isDuplicate = books.find(
+    const isDuplicate = books.some(
       book =>
         book.title.trim().toLowerCase() === title.trim().toLowerCase() &&
         book.author.trim().toLowerCase() === author.trim().toLowerCase()
