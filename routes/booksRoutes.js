@@ -5,10 +5,17 @@ const {
   validateCreateBook,
   validateUpdateBook
 } = require('../middleware/booksValidator.js')
+const path = require("path");
 
 router.get('/', (req, res) => {
   res.json(books)
 })
+
+router.get("/:id/view", (req, res) => {
+  res.sendFile(
+    path.join(__dirname, "..", "public", "book.html")
+  );
+});
 
 router.post('/', validateCreateBook, (req, res) => {
   const book = {
@@ -41,7 +48,7 @@ router.get('/:id', (req, res) => {
     return res.status(404).send('Not found')
   }
 
-  res.json(book)
+  res.json(book);
 })
 
 router.delete('/:id', (req, res) => {
@@ -73,5 +80,7 @@ router.patch('/:id', validateUpdateBook, (req, res) => {
 
   res.json(book)
 })
+
+
 
 module.exports = router

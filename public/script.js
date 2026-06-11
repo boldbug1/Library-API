@@ -25,16 +25,16 @@ async function loadBooks () {
   bookContainer.innerHTML = ''
   books.forEach(book => {
    const bookHTML = `
-<div class="book">
+<div class="book" onclick="openBook(${book.id})">
     <h3>${book.title}</h3>
     <p>${book.author}</p>
 
     <div class="book-actions">
-        <button class="edit-btn" onclick="editBook(${book.id})">
+        <button class="edit-btn" onclick="editBook(event,${book.id})">
             <i class="fa-solid fa-pen"></i>
         </button>
 
-        <button class="delete-btn" onclick="deleteBook(${book.id})">
+        <button class="delete-btn" onclick="deleteBook(event,${book.id})">
             <i class="fa-solid fa-trash"></i>
         </button>
     </div>
@@ -64,7 +64,8 @@ async function createBook (title, author) {
   return response;
 }
 
-async function deleteBook (id) {
+async function deleteBook (event,id) {
+  event.stopPropagation();
   await fetch(`/books/${id}`, {
     method: 'DELETE'
   })
@@ -126,7 +127,8 @@ function hideContainer(){
   InputContainer.reset();
 }
 
-function editBook (id) {
+function editBook (event,id) {
+  event.stopPropagation();
   showEditContainer();
   hideError(editErrorContainer);
   currentEditingId = id;
@@ -157,3 +159,7 @@ editContainer.addEventListener("submit", async (e)=>{
     hideError(editErrorContainer);
     hideEditContainer();
 })
+
+function openBook(id) {
+   window.location.href = `/books/${id}/view`;
+}
