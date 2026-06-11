@@ -77,5 +77,5 @@ function validateUpdateBook (req, res, next) {
 
 module.exports = {
   validateCreateBook,
-  validateUpdateBook
+  validateUpdateBook,
 }

@@ -9,6 +9,7 @@ const editErrorContainer = document.getElementById("edit-error-container");
 let localBooksArray = [];
 let currentEditingId = null;
 editContainer.style.display = 'none'
+hideContainer();
 
 function showError(containerType,error){
   containerType.textContent = error; 
@@ -23,14 +24,22 @@ async function loadBooks () {
   localBooksArray = books;
   bookContainer.innerHTML = ''
   books.forEach(book => {
-    const bookHTML = `
-            <div class="book">
-                <h1>${book.title}</h1>
-                <p>${book.author}</p>
-                <button onClick = "deleteBook(${book.id})">Delete</button>
-                <button onClick = "editBook(${book.id})">Edit</button>
-                </div>
-                `
+   const bookHTML = `
+<div class="book">
+    <h3>${book.title}</h3>
+    <p>${book.author}</p>
+
+    <div class="book-actions">
+        <button class="edit-btn" onclick="editBook(${book.id})">
+            <i class="fa-solid fa-pen"></i>
+        </button>
+
+        <button class="delete-btn" onclick="deleteBook(${book.id})">
+            <i class="fa-solid fa-trash"></i>
+        </button>
+    </div>
+</div>
+`;
 
     bookContainer.insertAdjacentHTML('beforeend', bookHTML)
   })
@@ -92,6 +101,7 @@ InputContainer.addEventListener('submit', async e => {
   }
   hideError(errorContainer);
   InputContainer.reset()
+  hideContainer();
 })
 
 loadBooks()
@@ -104,6 +114,16 @@ function hideEditContainer () {
 
 function showEditContainer () {
   editContainer.style.display = 'block'
+}
+
+function showContainer(){
+  InputContainer.style.display  = "block";
+}
+
+function hideContainer(){
+  InputContainer.style.display = "none";
+  hideError(errorContainer);
+  InputContainer.reset();
 }
 
 function editBook (id) {
