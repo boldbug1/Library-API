@@ -1,86 +1,159 @@
-const express = require('express')
-const { getNextId, books } = require('../data/booksData.js')
-const router = express.Router()
+const express = require('express');
+const router = express.Router();
+const path = require('path');
+
+const db = require('../database/db');
+
 const {
   validateCreateBook,
   validateUpdateBook
-} = require('../middleware/booksValidator.js')
-const path = require("path");
+} = require('../middleware/booksValidator.js');
 
 router.get('/', (req, res) => {
-  res.json(books)
-})
+  const books = db.prepare(`
+    SELECT *
+    FROM books
+  `).all();
 
-router.get("/:id/view", (req, res) => {
-  res.sendFile(
-    path.join(__dirname, "..", "public", "book.html")
-  );
+  res.json(books);
 });
 
-router.post('/', validateCreateBook, (req, res) => {
-  const book = {
-    id: getNextId(),
-    title: req.body.title,
-    author: req.body.author
-  }
-  books.push(book)
-  res.status(201).json(book)
-})
-
 router.get('/search', (req, res) => {
-  const bookName = req.query.title
+  const bookName = req.query.title;
 
-  const book = books.find(
-    book => book.title.toLowerCase() === bookName.toLowerCase()
-  )
-  if (!book) {
-    return res.status(404).send('Book not found')
-  }
-  res.json(book)
-})
-
-router.get('/:id', (req, res) => {
-  const id = Number(req.params.id)
-
-  const book = books.find(book => book.id === id)
+  const book = db.prepare(`
+    SELECT *
+    FROM books
+    WHERE LOWER(title) = LOWER(?)
+  `).get(bookName);
 
   if (!book) {
-    return res.status(404).send('Not found')
+    return res.status(404).send('Book not found');
   }
 
   res.json(book);
-})
+});
 
-router.delete('/:id', (req, res) => {
-  const id = Number(req.params.id)
-  const index = books.findIndex(book => book.id === id)
+router.get('/:id/view', (req, res) => {
+  res.sendFile(
+    path.join(__dirname, '..', 'public', 'book.html')
+  );
+});
 
-  if (index === -1) {
-    return res.status(404).send('Book not found')
-  }
+router.get('/:id', (req, res) => {
+  const id = Number(req.params.id);
 
-  books.splice(index, 1)
-
-  res.status(204).send()
-})
-
-router.patch('/:id', validateUpdateBook, (req, res) => {
-  const id = Number(req.params.id)
-  const book = books.find(book => book.id === id)
+  const book = db.prepare(`
+    SELECT *
+    FROM books
+    WHERE id = ?
+  `).get(id);
 
   if (!book) {
-    return res.status(404).send('Book not found')
-  }
-  if (req.body.title) {
-    book.title = req.body.title
-  }
-  if (req.body.author) {
-    book.author = req.body.author
+    return res.status(404).send('Book not found');
   }
 
-  res.json(book)
-})
+  res.json(book);
+});
 
+router.post('/', validateCreateBook, (req, res) => {
+  const title = req.body.title.trim();
+  const author = req.body.author.trim();
 
+  const duplicate = db.prepare(`
+    SELECT *
+    FROM books
+    WHERE LOWER(title) = LOWER(?)
+      AND LOWER(author) = LOWER(?)
+  `).get(title, author);
 
-module.exports = router
+  if (duplicate) {
+    return res
+      .status(400)
+      .json('Book with this title and author already exists');
+  }
+
+  const result = db.prepare(`
+    INSERT INTO books(title, author)
+    VALUES (?, ?)
+  `).run(title, author);
+
+  res.status(201).json({
+    id: result.lastInsertRowid,
+    title,
+    author
+  });
+});
+
+router.delete('/:id', (req, res) => {
+  const id = Number(req.params.id);
+
+  const result = db.prepare(`
+    DELETE FROM books
+    WHERE id = ?
+  `).run(id);
+
+  if (result.changes === 0) {
+    return res.status(404).send('Book not found');
+  }
+
+  res.status(204).send();
+});
+
+router.patch('/:id', validateUpdateBook, (req, res) => {
+  const id = Number(req.params.id);
+
+  const book = db.prepare(`
+    SELECT *
+    FROM books
+    WHERE id = ?
+  `).get(id);
+
+  if (!book) {
+    return res.status(404).send('Book not found');
+  }
+
+  const updatedTitle =
+    req.body.title?.trim() ?? book.title;
+
+  const updatedAuthor =
+    req.body.author?.trim() ?? book.author;
+
+  const duplicate = db.prepare(`
+    SELECT *
+    FROM books
+    WHERE LOWER(title) = LOWER(?)
+      AND LOWER(author) = LOWER(?)
+      AND id != ?
+  `).get(
+    updatedTitle,
+    updatedAuthor,
+    id
+  );
+
+  if (duplicate) {
+    return res
+      .status(400)
+      .json('Book with this title and author already exists');
+  }
+
+  db.prepare(`
+    UPDATE books
+    SET title = ?, author = ?
+    WHERE id = ?
+  `).run(
+    updatedTitle,
+    updatedAuthor,
+    id
+  );
+
+  const updatedBook = db.prepare(`
+    SELECT *
+    FROM books
+    WHERE id = ?
+  `).get(id);
+
+  res.json(updatedBook);
+});
+
+module.exports = router;
