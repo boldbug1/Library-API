@@ -1,6 +1,6 @@
-const Database = require("better-sqlite3");
+import Database from 'better-sqlite3';
 
-const db = new Database("library.db");
+const db:Database.Database = new Database("library.db");
 
 db.prepare(`
 CREATE TABLE IF NOT EXISTS books (
@@ -10,4 +10,4 @@ CREATE TABLE IF NOT EXISTS books (
 )
 `).run();
 
-module.exports = db;
+export default db;

@@ -1,15 +1,18 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const path = require('path');
+import path from 'path';
+import type {Request,Response} from 'express';
+import db from '../database/db.js';
+import { validateCreateBook, validateUpdateBook } from '../middleware/booksValidator.js';
 
-const db = require('../database/db');
 
-const {
-  validateCreateBook,
-  validateUpdateBook
-} = require('../middleware/booksValidator.js');
+interface Book {
+  id: number;
+  title: string;
+  author: string;
+}
 
-router.get('/', (req, res) => {
+router.get('/', (req : Request, res : Response) => {
   const books = db.prepare(`
     SELECT *
     FROM books
@@ -18,14 +21,14 @@ router.get('/', (req, res) => {
   res.json(books);
 });
 
-router.get('/search', (req, res) => {
+router.get('/search', (req  : Request, res:Response) => {
   const bookName = req.query.title;
 
   const book = db.prepare(`
     SELECT *
     FROM books
     WHERE LOWER(title) = LOWER(?)
-  `).get(bookName);
+  `).get(bookName) as Book;
 
   if (!book) {
     return res.status(404).send('Book not found');
@@ -34,20 +37,20 @@ router.get('/search', (req, res) => {
   res.json(book);
 });
 
-router.get('/:id/view', (req, res) => {
+router.get('/:id/view', (req :Request, res:Response) => {
   res.sendFile(
     path.join(__dirname, '..', 'public', 'book.html')
   );
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', (req:Request, res:Response) => {
   const id = Number(req.params.id);
 
   const book = db.prepare(`
     SELECT *
     FROM books
     WHERE id = ?
-  `).get(id);
+  `).get(id) as Book;
 
   if (!book) {
     return res.status(404).send('Book not found');
@@ -56,7 +59,7 @@ router.get('/:id', (req, res) => {
   res.json(book);
 });
 
-router.post('/', validateCreateBook, (req, res) => {
+router.post('/', validateCreateBook, (req:Request, res:Response) => {
   const title = req.body.title.trim();
   const author = req.body.author.trim();
 
@@ -65,7 +68,7 @@ router.post('/', validateCreateBook, (req, res) => {
     FROM books
     WHERE LOWER(title) = LOWER(?)
       AND LOWER(author) = LOWER(?)
-  `).get(title, author);
+  `).get(title, author) as Book;
 
   if (duplicate) {
     return res
@@ -85,7 +88,7 @@ router.post('/', validateCreateBook, (req, res) => {
   });
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', (req:Request, res:Response) => {
   const id = Number(req.params.id);
 
   const result = db.prepare(`
@@ -100,14 +103,14 @@ router.delete('/:id', (req, res) => {
   res.status(204).send();
 });
 
-router.patch('/:id', validateUpdateBook, (req, res) => {
+router.patch('/:id', validateUpdateBook, (req:Request, res:Response) => {
   const id = Number(req.params.id);
 
   const book = db.prepare(`
     SELECT *
     FROM books
     WHERE id = ?
-  `).get(id);
+  `).get(id) as Book;
 
   if (!book) {
     return res.status(404).send('Book not found');
@@ -156,5 +159,4 @@ router.patch('/:id', validateUpdateBook, (req, res) => {
   res.json(updatedBook);
 });
 
-
-module.exports = router;
+export default router;

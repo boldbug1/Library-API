@@ -1,7 +1,7 @@
-const express = require("express");
+import express from 'express';
 const app = express();
-const logger = require("./middleware/logger.js")
-const booksRouter = require("./routes/booksRoutes.js")
+import logger from './middleware/logger.js';
+import booksRouter from './routes/booksRoutes.js';
 //Middleware
 app.use(express.json());
 app.use(express.static("public"));
