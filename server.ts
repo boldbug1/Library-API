@@ -10,5 +10,6 @@ app.use("/books", booksRouter);
 
 
 app.listen(3000,()=>{
-    console.log("Server running...");
+    console.log(`live at http://localhost:3000
+    Server running...`);
 })
